@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Models\Tugas;
 
 class PageController extends Controller
 {
@@ -70,11 +71,13 @@ class PageController extends Controller
             now()->startOfMonth(),
             false
         );
-        $first = now()->startOfMonth();
-        $tasks = collect([
-            ['title' => 'Kuis Kalkulus', 'time' => '08:00', 'priority' => 'Tinggi', 'note' => 'Bab turunan dan integral.', 'date' => $first->copy()->addDays(4)->toDateString()],
-            ['title' => 'Laporan Fisika', 'time' => '13:30', 'priority' => 'Sedang', 'note' => 'Kumpulkan lewat email dosen.', 'date' => $first->copy()->addDays(9)->toDateString()],
-            ['title' => 'Belajar kelompok', 'time' => '19:00', 'priority' => 'Rendah', 'note' => 'Video call bersama tim.', 'date' => $first->copy()->addDays(14)->toDateString()],
+
+        $tasks = Tugas::all()->map(fn ($t) => [
+            'title'    => $t->judul,
+            'time'     => substr($t->waktu, 0, 5),
+            'priority' => $t->prioritas,
+            'note'     => $t->catatan ?? '',
+            'date'     => $t->tanggal->toDateString(),
         ])->sortBy('time')->values();
 
         return view('calendar', [
@@ -88,7 +91,6 @@ class PageController extends Controller
             'tasks' => $tasks,
         ]);
     }
-
     public function cloud()
     {
         $used = 12;
